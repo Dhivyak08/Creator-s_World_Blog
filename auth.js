@@ -18,14 +18,29 @@ if (signupForm) {
             return;
         }
 
+        console.log("Sending signup:", { name, email, password }); // 🔥 debug
+
         try {
             const res = await fetch(`${BASE_URL}/signup`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password
+                })
             });
 
-            const data = await res.json();
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                throw new Error("Invalid JSON response from server");
+            }
+
+            console.log("Response:", data); // 🔥 debug
 
             if (!res.ok) {
                 alert(data.message || "Signup failed");
@@ -36,7 +51,7 @@ if (signupForm) {
             window.location.href = "login.html";
 
         } catch (err) {
-            console.error(err);
+            console.error("Signup error:", err);
             alert("Server error");
         }
     });
@@ -59,14 +74,28 @@ if (loginForm) {
             return;
         }
 
+        console.log("Sending login:", { email, password }); // 🔥 debug
+
         try {
             const res = await fetch(`${BASE_URL}/login`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
             });
 
-            const user = await res.json();
+            let user;
+            try {
+                user = await res.json();
+            } catch {
+                throw new Error("Invalid JSON response from server");
+            }
+
+            console.log("Login response:", user); // 🔥 debug
 
             if (!res.ok) {
                 alert(user.message || "Invalid credentials");
@@ -78,7 +107,7 @@ if (loginForm) {
             window.location.href = "dashboard.html";
 
         } catch (err) {
-            console.error(err);
+            console.error("Login error:", err);
             alert("Server error");
         }
     });
