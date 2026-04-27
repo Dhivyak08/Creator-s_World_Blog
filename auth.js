@@ -1,3 +1,5 @@
+const BASE_URL = "https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api";
+
 // ---------------- SIGN UP ----------------
 const signupForm = document.getElementById("signupForm");
 
@@ -17,7 +19,7 @@ if (signupForm) {
         }
 
         try {
-            const res = await fetch("/api/signup", {
+            const res = await fetch(`${BASE_URL}/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, password })
@@ -58,7 +60,7 @@ if (loginForm) {
         }
 
         try {
-            const res = await fetch("/api/login", {
+            const res = await fetch(`${BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
@@ -71,7 +73,6 @@ if (loginForm) {
                 return;
             }
 
-            // store logged-in user
             localStorage.setItem("currentUser", JSON.stringify(user));
 
             window.location.href = "dashboard.html";
