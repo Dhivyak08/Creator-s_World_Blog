@@ -1,12 +1,38 @@
-// Get blogs from localStorage
-function getBlogs() {
+// 🔹 Get blogs from localStorage (dashboard)
+function getLocalBlogs() {
     return JSON.parse(localStorage.getItem("blogs")) || [];
 }
 
 const container = document.getElementById("blogContainer");
 const searchInput = document.getElementById("searchInput");
 
-// Display blogs (limit to 20)
+let allBlogs = [];
+
+// 🔹 Fetch blogs from API (Cosmos DB)
+async function getApiBlogs() {
+    try {
+        const res = await fetch("https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api/getBlogs");
+        const data = await res.json();
+        console.log("API Blogs:", data);
+        return data;
+    } catch (err) {
+        console.error("API Error:", err);
+        return [];
+    }
+}
+
+// 🔹 Load both local + API blogs
+async function loadBlogs() {
+    const localBlogs = getLocalBlogs();
+    const apiBlogs = await getApiBlogs();
+
+    // merge both
+    allBlogs = [...apiBlogs, ...localBlogs];
+
+    displayBlogs(allBlogs);
+}
+
+// 🔹 Display blogs
 function displayBlogs(blogList) {
     container.innerHTML = "";
 
@@ -14,7 +40,6 @@ function displayBlogs(blogList) {
 
         const authorText = blog.name || blog.author;
 
-        // ❌ Skip blog if no author
         if (!authorText) return;
 
         const div = document.createElement("div");
@@ -30,17 +55,11 @@ function displayBlogs(blogList) {
     });
 }
 
-// Load blogs initially
-function loadBlogs() {
-    const blogs = getBlogs();
-    displayBlogs(blogs);
-}
-
-// Search functionality
+// 🔹 Search
 searchInput.addEventListener("input", function () {
     const value = this.value.toLowerCase();
 
-    const filtered = getBlogs().filter(blog =>
+    const filtered = allBlogs.filter(blog =>
         blog.title.toLowerCase().includes(value) ||
         blog.content.toLowerCase().includes(value)
     );
@@ -48,5 +67,5 @@ searchInput.addEventListener("input", function () {
     displayBlogs(filtered);
 });
 
-// Initial call
+// 🔹 Initial load
 loadBlogs();
