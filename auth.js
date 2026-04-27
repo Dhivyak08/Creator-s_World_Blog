@@ -1,18 +1,8 @@
-// Get users from localStorage
-function getUsers() {
-    return JSON.parse(localStorage.getItem("users")) || [];
-}
-
-// Save users
-function saveUsers(users) {
-    localStorage.setItem("users", JSON.stringify(users));
-}
-
 // ---------------- SIGN UP ----------------
 const signupForm = document.getElementById("signupForm");
 
 if (signupForm) {
-    signupForm.addEventListener("submit", function (e) {
+    signupForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const inputs = signupForm.querySelectorAll("input");
@@ -20,20 +10,27 @@ if (signupForm) {
         const email = inputs[1].value;
         const password = inputs[2].value;
 
-        const users = getUsers();
+        try {
+            const res = await fetch("/api/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
+            });
 
-        // Check if user exists
-        const exists = users.find(user => user.email === email);
-        if (exists) {
-            alert("User already exists!");
-            return;
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Signup failed");
+                return;
+            }
+
+            alert("Registration successful!");
+            window.location.href = "login.html";
+
+        } catch (err) {
+            alert("Server error");
+            console.error(err);
         }
-
-        users.push({ name, email, password });
-        saveUsers(users);
-
-        alert("Registration successful!");
-        window.location.href = "login.html";
     });
 }
 
@@ -41,28 +38,36 @@ if (signupForm) {
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
-    loginForm.addEventListener("submit", function (e) {
+    loginForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const inputs = loginForm.querySelectorAll("input");
         const email = inputs[0].value;
         const password = inputs[1].value;
 
-        const users = getUsers();
+        try {
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
 
-        const user = users.find(
-            u => u.email === email && u.password === password
-        );
+            const user = await res.json();
 
-        if (!user) {
-            alert("Invalid credentials!");
-            return;
+            if (!res.ok) {
+                alert(user.message || "Invalid credentials");
+                return;
+            }
+
+            // ✅ Store logged-in user ONLY
+            localStorage.setItem("currentUser", JSON.stringify(user));
+
+            alert("Login successful!");
+            window.location.href = "dashboard.html";
+
+        } catch (err) {
+            alert("Server error");
+            console.error(err);
         }
-
-        // Save logged-in user
-        localStorage.setItem("currentUser", JSON.stringify(user));
-
-        alert("Login successful!");
-        window.location.href = "dashboard.html";
     });
 }
