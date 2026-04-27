@@ -6,9 +6,15 @@ if (signupForm) {
         e.preventDefault();
 
         const inputs = signupForm.querySelectorAll("input");
-        const name = inputs[0].value;
-        const email = inputs[1].value;
-        const password = inputs[2].value;
+
+        const name = inputs[0].value.trim();
+        const email = inputs[1].value.trim();
+        const password = inputs[2].value.trim();
+
+        if (!name || !email || !password) {
+            alert("All fields are required");
+            return;
+        }
 
         try {
             const res = await fetch("/api/signup", {
@@ -28,8 +34,8 @@ if (signupForm) {
             window.location.href = "login.html";
 
         } catch (err) {
-            alert("Server error");
             console.error(err);
+            alert("Server error");
         }
     });
 }
@@ -42,8 +48,14 @@ if (loginForm) {
         e.preventDefault();
 
         const inputs = loginForm.querySelectorAll("input");
-        const email = inputs[0].value;
-        const password = inputs[1].value;
+
+        const email = inputs[0].value.trim();
+        const password = inputs[1].value.trim();
+
+        if (!email || !password) {
+            alert("All fields are required");
+            return;
+        }
 
         try {
             const res = await fetch("/api/login", {
@@ -59,15 +71,14 @@ if (loginForm) {
                 return;
             }
 
-            // ✅ Store logged-in user ONLY
+            // store logged-in user
             localStorage.setItem("currentUser", JSON.stringify(user));
 
-            alert("Login successful!");
             window.location.href = "dashboard.html";
 
         } catch (err) {
-            alert("Server error");
             console.error(err);
+            alert("Server error");
         }
     });
 }
