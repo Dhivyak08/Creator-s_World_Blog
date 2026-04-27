@@ -1,12 +1,25 @@
-
-function getBlogs() {
-    return JSON.parse(localStorage.getItem("blogs")) || [];
-}
-
+// DOM elements
 const container = document.getElementById("blogContainer");
 const searchInput = document.getElementById("searchInput");
 
-// Display blogs (limit to 20)
+let allBlogs = [];
+
+// ---------------- FETCH BLOGS ----------------
+async function loadBlogs() {
+    try {
+        const res = await fetch("/api/getBlogs");
+        const blogs = await res.json();
+
+        allBlogs = blogs;
+        displayBlogs(allBlogs);
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to load blogs");
+    }
+}
+
+// ---------------- DISPLAY BLOGS ----------------
 function displayBlogs(blogList) {
     container.innerHTML = "";
 
@@ -14,7 +27,6 @@ function displayBlogs(blogList) {
 
         const authorText = blog.name || blog.author;
 
-        // ❌ Skip blog if no author
         if (!authorText) return;
 
         const div = document.createElement("div");
@@ -30,17 +42,11 @@ function displayBlogs(blogList) {
     });
 }
 
-// Load blogs initially
-function loadBlogs() {
-    const blogs = getBlogs();
-    displayBlogs(blogs);
-}
-
-// Search functionality
+// ---------------- SEARCH ----------------
 searchInput.addEventListener("input", function () {
     const value = this.value.toLowerCase();
 
-    const filtered = getBlogs().filter(blog =>
+    const filtered = allBlogs.filter(blog =>
         blog.title.toLowerCase().includes(value) ||
         blog.content.toLowerCase().includes(value)
     );
@@ -48,5 +54,5 @@ searchInput.addEventListener("input", function () {
     displayBlogs(filtered);
 });
 
-// Initial call
+// ---------------- INIT ----------------
 loadBlogs();
