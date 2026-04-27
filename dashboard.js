@@ -4,12 +4,14 @@ if (!currentUser) {
     window.location.href = "login.html";
 }
 
+const BASE_URL = "https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api";
+
 let editId = null;
 
 // ---------------- LOAD BLOGS ----------------
 async function loadBlogs() {
     try {
-        const res = await fetch("/api/getBlogs");
+        const res = await fetch(`${BASE_URL}/getBlogs`);
         const blogs = await res.json();
 
         displayBlogs(blogs);
@@ -58,7 +60,7 @@ async function addBlog() {
     try {
         if (editId) {
             // 🔄 UPDATE
-            await fetch("/api/updateBlog", {
+            const res = await fetch(`${BASE_URL}/updateBlog`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -68,11 +70,13 @@ async function addBlog() {
                 })
             });
 
+            if (!res.ok) throw new Error("Update failed");
+
             editId = null;
 
         } else {
             // ➕ CREATE
-            await fetch("/api/createBlog", {
+            const res = await fetch(`${BASE_URL}/createBlog`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -82,6 +86,8 @@ async function addBlog() {
                     name: currentUser.name
                 })
             });
+
+            if (!res.ok) throw new Error("Create failed");
         }
 
         document.getElementById("title").value = "";
@@ -91,7 +97,7 @@ async function addBlog() {
 
     } catch (err) {
         console.error(err);
-        alert("Error saving blog");
+        alert(err.message);
     }
 }
 
@@ -109,17 +115,19 @@ async function deleteBlog(id) {
     if (!confirmDelete) return;
 
     try {
-        await fetch("/api/deleteBlog", {
+        const res = await fetch(`${BASE_URL}/deleteBlog`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id })
         });
 
+        if (!res.ok) throw new Error("Delete failed");
+
         loadBlogs();
 
     } catch (err) {
         console.error(err);
-        alert("Delete failed");
+        alert(err.message);
     }
 }
 
