@@ -2,12 +2,14 @@
 const container = document.getElementById("blogContainer");
 const searchInput = document.getElementById("searchInput");
 
+const BASE_URL = "https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api";
+
 let allBlogs = [];
 
 // ---------------- FETCH BLOGS ----------------
 async function loadBlogs() {
     try {
-        const res = await fetch("/api/getBlogs");
+        const res = await fetch(`${BASE_URL}/getBlogs`);
         const blogs = await res.json();
 
         allBlogs = blogs;
