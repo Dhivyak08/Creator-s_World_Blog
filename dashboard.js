@@ -4,67 +4,28 @@ if (!currentUser) {
     window.location.href = "login.html";
 }
 
-let editIndex = null;
+let editId = null;
 
-// Get blogs
-function getBlogs() {
-    return JSON.parse(localStorage.getItem("blogs")) || [];
-}
+// ---------------- LOAD BLOGS ----------------
+async function loadBlogs() {
+    try {
+        const res = await fetch("/api/getBlogs");
+        const blogs = await res.json();
 
-// Save blogs
-function saveBlogs(blogs) {
-    localStorage.setItem("blogs", JSON.stringify(blogs));
-}
+        displayBlogs(blogs);
 
-// Add or Update blog
-function addBlog() {
-    const titleInput = document.getElementById("title");
-    const contentInput = document.getElementById("content");
-
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
-
-    if (!title || !content) {
-        alert("Fill all fields");
-        return;
+    } catch (err) {
+        console.error(err);
+        alert("Failed to load blogs");
     }
-
-    const blogs = getBlogs();
-
-    if (editIndex !== null) {
-        // ✅ UPDATE EXISTING BLOG
-        if (blogs[editIndex] && blogs[editIndex].author === currentUser.email) {
-            blogs[editIndex].title = title;
-            blogs[editIndex].content = content;
-        }
-        editIndex = null;
-    } else {
-        // ✅ ADD NEW BLOG
-        blogs.push({
-    title,
-    content,
-    author: currentUser.email,
-    name: currentUser.name   // ✅ add this
-});
-    }
-
-    saveBlogs(blogs);
-
-    // Reset form
-    titleInput.value = "";
-    contentInput.value = "";
-
-    displayBlogs();
 }
 
-// Show blogs
-function displayBlogs() {
+// ---------------- DISPLAY BLOGS ----------------
+function displayBlogs(blogs) {
     const container = document.getElementById("userBlogs");
-    const blogs = getBlogs();
-
     container.innerHTML = "";
 
-    blogs.forEach((blog, index) => {
+    blogs.forEach(blog => {
         if (blog.author === currentUser.email) {
             const div = document.createElement("div");
             div.className = "blog-card";
@@ -74,8 +35,8 @@ function displayBlogs() {
                 <p>${blog.content}</p>
 
                 <div style="margin-top:10px;">
-                    <button onclick="editBlog(${index})">Edit</button>
-                    <button onclick="deleteBlog(${index})">Delete</button>
+                    <button onclick="editBlog('${blog.id}', '${blog.title}', \`${blog.content}\`)">Edit</button>
+                    <button onclick="deleteBlog('${blog.id}')">Delete</button>
                 </div>
             `;
 
@@ -84,57 +45,94 @@ function displayBlogs() {
     });
 }
 
-// Edit blog
-function editBlog(index) {
-    const blogs = getBlogs();
-    const blog = blogs[index];
+// ---------------- ADD / UPDATE BLOG ----------------
+async function addBlog() {
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
 
-    if (!blog || blog.author !== currentUser.email) {
-        alert("Invalid edit operation");
+    if (!title || !content) {
+        alert("Fill all fields");
         return;
     }
 
-    document.getElementById("title").value = blog.title;
-    document.getElementById("content").value = blog.content;
+    try {
+        if (editId) {
+            // 🔄 UPDATE
+            await fetch("/api/updateBlog", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: editId,
+                    title,
+                    content
+                })
+            });
 
-    editIndex = index;
-}
+            editId = null;
 
-// Delete blog
-function deleteBlog(index) {
-    const blogs = getBlogs();
+        } else {
+            // ➕ CREATE
+            await fetch("/api/createBlog", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    content,
+                    author: currentUser.email,
+                    name: currentUser.name
+                })
+            });
+        }
 
-    if (!blogs[index] || blogs[index].author !== currentUser.email) {
-        alert("Invalid delete operation");
-        return;
-    }
-
-    const confirmDelete = confirm("Are you sure you want to delete?");
-    if (!confirmDelete) return;
-
-    blogs.splice(index, 1);
-
-    saveBlogs(blogs);
-
-    // Reset edit if needed
-    if (editIndex === index) {
-        editIndex = null;
         document.getElementById("title").value = "";
         document.getElementById("content").value = "";
-    }
 
-    displayBlogs();
+        loadBlogs();
+
+    } catch (err) {
+        console.error(err);
+        alert("Error saving blog");
+    }
 }
 
-// Logout
+// ---------------- EDIT BLOG ----------------
+function editBlog(id, title, content) {
+    document.getElementById("title").value = title;
+    document.getElementById("content").value = content;
+
+    editId = id;
+}
+
+// ---------------- DELETE BLOG ----------------
+async function deleteBlog(id) {
+    const confirmDelete = confirm("Are you sure?");
+    if (!confirmDelete) return;
+
+    try {
+        await fetch("/api/deleteBlog", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        });
+
+        loadBlogs();
+
+    } catch (err) {
+        console.error(err);
+        alert("Delete failed");
+    }
+}
+
+// ---------------- LOGOUT ----------------
 function logout() {
     localStorage.removeItem("currentUser");
     window.location.href = "login.html";
 }
 
-// Initial load
-displayBlogs();
-
+// ---------------- HOME ----------------
 function goHome() {
     window.location.href = "index.html";
 }
+
+// ---------------- INIT ----------------
+loadBlogs();
