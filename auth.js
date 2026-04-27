@@ -1,13 +1,23 @@
+// Get users
+function getUsers() {
+    return JSON.parse(localStorage.getItem("users")) || [];
+}
+
+// Save users
+function saveUsers(users) {
+    localStorage.setItem("users", JSON.stringify(users));
+}
+
 // ---------------- SIGN UP ----------------
+const signupForm = document.getElementById("signupForm");
+
 if (signupForm) {
     signupForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const inputs = signupForm.querySelectorAll("input");
-
-        const name = inputs[0].value.trim();
-        const email = inputs[1].value.trim();
-        const password = inputs[2].value.trim();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
         if (!name || !email || !password) {
             alert("All fields required");
@@ -31,19 +41,14 @@ if (signupForm) {
 }
 
 // ---------------- LOGIN ----------------
+const loginForm = document.getElementById("loginForm");
+
 if (loginForm) {
     loginForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const inputs = loginForm.querySelectorAll("input");
-
-        const email = inputs[0].value.trim();
-        const password = inputs[1].value.trim();
-
-        if (!email || !password) {
-            alert("All fields required");
-            return;
-        }
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
         const users = getUsers();
 
