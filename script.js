@@ -1,4 +1,4 @@
-// Get blogs from localStorage
+
 function getBlogs() {
     return JSON.parse(localStorage.getItem("blogs")) || [];
 }
