@@ -1,87 +1,82 @@
-console.log("SCRIPT LOADED");
-// 🔹 Get blogs from localStorage (dashboard)
-function getLocalBlogs() {
-    return JSON.parse(localStorage.getItem("blogs")) || [];
-}
+document.addEventListener("DOMContentLoaded", function () {
 
-const container = document.getElementById("blogContainer");
-const searchInput = document.getElementById("searchInput");
+    console.log("SCRIPT LOADED");
 
-let allBlogs = [];
-
-// 🔹 Fetch blogs from API (Cosmos DB)
-async function getApiBlogs() {
-    try {
-        const res = await fetch("https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api/getBlogs");
-
-        const data = await res.json();
-
-        console.log("API Blogs RAW:", data);
-
-        // 🔥 CLEAN DATA
-        const cleaned = data.map(blog => ({
-            id: blog.id,
-            title: blog.title,
-            content: blog.content,
-            author: blog.author,
-            name: blog.name
-        }));
-
-        console.log("CLEANED BLOGS:", cleaned);
-
-        return cleaned;
-
-    } catch (err) {
-        console.error("API Error:", err);
-        return [];
+    function getLocalBlogs() {
+        return JSON.parse(localStorage.getItem("blogs")) || [];
     }
-}
 
-// 🔹 Load both local + API blogs
-async function loadBlogs() {
-    const localBlogs = getLocalBlogs();
-    const apiBlogs = await getApiBlogs();
+    const container = document.getElementById("blogContainer");
+    const searchInput = document.getElementById("searchInput");
 
-    // merge both
-    allBlogs = [...apiBlogs, ...localBlogs];
+    let allBlogs = [];
 
-    displayBlogs(allBlogs);
-}
+    async function getApiBlogs() {
+        try {
+            const res = await fetch("https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api/getBlogs");
 
-// 🔹 Display blogs
-function displayBlogs(blogList) {
-    container.innerHTML = "";
+            const data = await res.json();
 
-    blogList.slice(0, 20).forEach(blog => {
+            console.log("API Blogs RAW:", data);
 
-        if (!blog.title || !blog.content) return; // 🔥 prevent bad data
+            const cleaned = data.map(blog => ({
+                id: blog.id,
+                title: blog.title,
+                content: blog.content,
+                author: blog.author,
+                name: blog.name
+            }));
 
-        const authorText = blog.name || blog.author || "Unknown";
+            return cleaned;
 
-        const div = document.createElement("div");
-        div.className = "blog-card";
+        } catch (err) {
+            console.error("API Error:", err);
+            return [];
+        }
+    }
 
-        div.innerHTML = `
-            <h3>${blog.title}</h3>
-            <p>${blog.content}</p>
-            <small>By: ${authorText}</small>
-        `;
+    async function loadBlogs() {
+        const localBlogs = getLocalBlogs();
+        const apiBlogs = await getApiBlogs();
 
-        container.appendChild(div);
+        allBlogs = [...apiBlogs, ...localBlogs];
+
+        displayBlogs(allBlogs);
+    }
+
+    function displayBlogs(blogList) {
+        container.innerHTML = "";
+
+        blogList.slice(0, 20).forEach(blog => {
+
+            if (!blog.title || !blog.content) return;
+
+            const authorText = blog.name || blog.author || "Unknown";
+
+            const div = document.createElement("div");
+            div.className = "blog-card";
+
+            div.innerHTML = `
+                <h3>${blog.title}</h3>
+                <p>${blog.content}</p>
+                <small>By: ${authorText}</small>
+            `;
+
+            container.appendChild(div);
+        });
+    }
+
+    searchInput.addEventListener("input", function () {
+        const value = this.value.toLowerCase();
+
+        const filtered = allBlogs.filter(blog =>
+            blog.title.toLowerCase().includes(value) ||
+            blog.content.toLowerCase().includes(value)
+        );
+
+        displayBlogs(filtered);
     });
-}
 
-// 🔹 Search
-searchInput.addEventListener("input", function () {
-    const value = this.value.toLowerCase();
+    loadBlogs();
 
-    const filtered = allBlogs.filter(blog =>
-        blog.title.toLowerCase().includes(value) ||
-        blog.content.toLowerCase().includes(value)
-    );
-
-    displayBlogs(filtered);
 });
-
-// 🔹 Initial load
-loadBlogs();
