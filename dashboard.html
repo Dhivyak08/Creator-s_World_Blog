@@ -44,11 +44,15 @@
 
     <!-- Set username -->
     <script>
-        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-        if (currentUser && currentUser.name) {
-            document.getElementById("username").innerText = currentUser.name;
-        }
-    </script>
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!currentUser) {
+        // 🔥 redirect if not logged in
+        window.location.href = "login.html";
+    } else {
+        document.getElementById("username").innerText = currentUser.name;
+    }
+</script>
 
 </body>
 </html>
