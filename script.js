@@ -1,3 +1,4 @@
+console.log("SCRIPT LOADED");
 // 🔹 Get blogs from localStorage (dashboard)
 function getLocalBlogs() {
     return JSON.parse(localStorage.getItem("blogs")) || [];
@@ -12,9 +13,24 @@ let allBlogs = [];
 async function getApiBlogs() {
     try {
         const res = await fetch("https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api/getBlogs");
+
         const data = await res.json();
-        console.log("API Blogs:", data);
-        return data;
+
+        console.log("API Blogs RAW:", data);
+
+        // 🔥 CLEAN DATA
+        const cleaned = data.map(blog => ({
+            id: blog.id,
+            title: blog.title,
+            content: blog.content,
+            author: blog.author,
+            name: blog.name
+        }));
+
+        console.log("CLEANED BLOGS:", cleaned);
+
+        return cleaned;
+
     } catch (err) {
         console.error("API Error:", err);
         return [];
@@ -38,9 +54,9 @@ function displayBlogs(blogList) {
 
     blogList.slice(0, 20).forEach(blog => {
 
-        const authorText = blog.name || blog.author;
+        if (!blog.title || !blog.content) return; // 🔥 prevent bad data
 
-        if (!authorText) return;
+        const authorText = blog.name || blog.author || "Unknown";
 
         const div = document.createElement("div");
         div.className = "blog-card";
