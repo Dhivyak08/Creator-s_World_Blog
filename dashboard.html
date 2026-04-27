@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Creator's World</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div>Creator's World</div>
+
+        <div>
+            <button onclick="goHome()">Home</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Welcome User -->
+    <p style="text-align:center; margin-top:15px;">
+        Welcome, <span id="username"></span>
+    </p>
+
+    <!-- Add Blog Section -->
+    <section class="dashboard-form">
+        <h2>Add New Blog</h2>
+
+        <input type="text" id="title" placeholder="Blog Title">
+
+        <textarea id="content" placeholder="Write your blog..." rows="6"></textarea>
+
+        <button onclick="addBlog()">Publish</button>
+    </section>
+
+    <!-- User Blogs -->
+    <section class="dashboard-blogs">
+        <h3>Your Blogs</h3>
+        <div id="userBlogs" class="blogs"></div>
+    </section>
+
+    <!-- Script -->
+    <script src="dashboard.js"></script>
+
+    <!-- Set username -->
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        if (currentUser && currentUser.name) {
+            document.getElementById("username").innerText = currentUser.name;
+        }
+    </script>
+
+</body>
+</html>
