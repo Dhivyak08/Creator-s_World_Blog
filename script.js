@@ -13,7 +13,7 @@ let allBlogs = [];
 // 🔹 Fetch API blogs
 async function getApiBlogs() {
     try {
-        const res = await fetch("https://creatorsworld-api-cyhybeefbfage5gv.southeastasia-01.azurewebsites.net/api/getBlogs");
+        const res = await fetch("https://creatorsworld-api-tf.azurewebsites.net/api/getBlogs");
 
         const data = await res.json();
 
